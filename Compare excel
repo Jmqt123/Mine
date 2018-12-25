@@ -1,0 +1,73 @@
+import xlsxwriter
+import pandas as pd
+import tkinter as tk
+import datetime
+
+
+def compare():
+    x = datetime.datetime.now()
+    x = datetime.datetime.strftime(x, '%m%d%y%I%M%S')
+
+    df1 = pd.read_excel("C:\\Users\\Musthafa\\Downloads\\Hand22.xlsx", index_col=None, header=None)
+    df2 = pd.read_excel("C:\\Users\\Musthafa\\Downloads\\Hand11.xlsx", index_col=None, header=None)
+
+    path = "C:\\Users\\Musthafa\\Downloads\\Output_" + x + ".xlsx"
+
+    print(path)
+
+    # Create an new Excel file and add a worksheet.
+    workbook = xlsxwriter.Workbook(path)
+    worksheet = workbook.add_worksheet(name='Sheet1')
+
+    cell_format = workbook.add_format()
+    cell_format.set_pattern(1)  # This is optional when using a solid fill.
+    cell_format.set_bg_color('red')
+    # worksheet.write('A1', 'Ray', cell_format)
+
+    # print(df1.shape)
+
+    nRows1, nCols1 = df1.shape
+    nRows2, nCols2 = df2.shape
+
+    iRow = 0
+    iCol = 0
+
+    for iRow in range(nRows1):
+        for iCol in range(nCols1):
+            worksheet.write(iRow, iCol, df1.at[iRow, iCol])
+
+    worksheet = workbook.add_worksheet(name='Sheet2')
+
+    iRow = 0
+    iCol = 0
+
+    try:
+        for iRow in range(nRows1):
+            for iCol in range(nCols1):
+                if df1.at[iRow, iCol] == df2.at[iRow, iCol]:
+                    worksheet.write(iRow, iCol, df2.at[iRow, iCol])
+                else:
+                    worksheet.write(iRow, iCol, df2.at[iRow, iCol], cell_format)
+
+        diff = 0
+        iCol2 = 0
+        if nRows2 > nRows1:
+            # diff = nRows1 + 1
+            for nRows1 in range(nRows1, nRows2):
+                for iCol2 in range(nCols2):
+                    worksheet.write(nRows1, iCol2, df2.at[nRows1, iCol2], cell_format)
+                nRows1 += 1
+
+    except Exception as e:
+        print(e)
+
+    # Close the Pandas Excel writer and output the Excel file.
+    workbook.close()
+
+
+m = tk.Tk()
+m.title('Compare Excel')
+button = tk.Button(m, text='Compare', width=25, command = compare()).pack()
+button = tk.Button(m, text='Cancel', width=25, command = m.destroy).pack()
+
+m.mainloop()
